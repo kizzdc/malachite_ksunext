@@ -28,8 +28,18 @@ bash /tmp/malachite-ksunext-setup.sh "$KSU_TAG"
 
 DEFCONFIG=common/arch/arm64/configs/gki_defconfig
 test -f "$DEFCONFIG" || { echo "ERROR: Missing $DEFCONFIG" >&2; exit 3; }
-common/scripts/config --file "$DEFCONFIG" -e KPROBES -e EXT4_FS -e KSU
-grep -q '^CONFIG_KSU=y$' "$DEFCONFIG"
+# CONFIG_KSU is "default y" in KernelSU Next Kconfig once dependencies are met.
+# Explicitly adding it to gki_defconfig makes Bazel's savedefconfig check fail.
+# Preserve the existing minimal defconfig and let Kconfig select KernelSU.
+common/scripts/config --file "$DEFCONFIG" -e KPROBES -e EXT4_FS
+test -L common/drivers/kernelsu || { echo 'ERROR: KSU source symlink missing'; exit 4; }
+grep -Fq 'source "drivers/kernelsu/Kconfig"' common/drivers/Kconfig || {
+  echo 'ERROR: KernelSU Kconfig was not sourced'; exit 5;
+}
+grep -q 'default y' common/drivers/kernelsu/Kconfig || {
+  echo 'ERROR: KernelSU default-y condition not found'; exit 6;
+}
+# Verify the effective .config (CONFIG_KSU=y) after building.
 
 cat > build-verification.txt <<EOF
 Device: malachite / HyperOS 1 / Android 14
