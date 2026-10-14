@@ -2,6 +2,12 @@ name: Malachite - GKI 6.1.78 KSU Next (NO SUSFS)
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/build_malachite_ksunext.yml'
+      - 'scripts/**'
 
 permissions:
   contents: read
