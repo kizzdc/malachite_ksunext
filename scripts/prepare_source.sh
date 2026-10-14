@@ -10,7 +10,7 @@ KSU_TAG='v3.4.2'
 mkdir -p gki
 cd gki
 repo init -u https://android.googlesource.com/kernel/manifest \
-  -b common-android14-6.1-2024-06 --depth=1
+  -b common-android14-6.1 --depth=1
 repo sync -c -j4 --no-tags --fail-fast
 
 git -C common fetch --depth=1 https://android.googlesource.com/kernel/common \
